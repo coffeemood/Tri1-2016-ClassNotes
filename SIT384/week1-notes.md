@@ -46,6 +46,7 @@ We can manually grab date sub-objects and convert them:
 
 ```r
 ufo$DateOccurred<-as.Date(ufo$DateOccurred,format="%Y%m%d")
+ufo$DateReported<-as.Date(ufo$DateReported, format="%Y%m%d")
 ```
 
 The command above should produce an error. This is due to some entry being out of format and malformed. 
@@ -65,6 +66,8 @@ The final command reapplies the ufo data frame using the vector as conditions
 ```r
 ufo<-ufo[good.rows,]
 ```
+
+Now we can repeat the formatting codes and it should work
 
 ##### Organising locational data: 
 
