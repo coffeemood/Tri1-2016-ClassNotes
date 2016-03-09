@@ -48,6 +48,24 @@ We can manually grab date sub-objects and convert them:
 ufo$DateOccurred<-as.Date(ufo$DateOccurred,format="%Y%m%d")
 ```
 
+The command above should produce an error. This is due to some entry being out of format and malformed. 
+
+We then need to to create a "data vector" for good entries and bad entries, which we will use to reapply into the frame. 
+
+```r
+good.rows<-ifelse(nchar(ufo$DateOccurred)>!=8 | nchar(ufo$DateReported)!=8,False,True)
+```
+
+The length function gives the number of malformed data
+```r
+length(which(!good.rows))
+```
+
+The final command reapplies the ufo data frame using the vector as conditions
+```r
+ufo<-ufo[good.rows,]
+```
+
 ##### Organising locational data: 
 
 We use `lapply` function to format location data using R's regex.
