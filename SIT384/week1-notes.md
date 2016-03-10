@@ -6,18 +6,17 @@ This week we are introduced to the course and we took a look at the UFO case stu
 
 ### Overview 
 
-Loading the data set to study a few possible questions such as: 
-    - Seasonal trends
-    - Frequencies
-    - Variation across states 
+We are going to work on a comprehensive UFO sighting report dataframe and analyse it.
 
-### Using R for analysis 
+Loading the data set to study a few possible questions such as:
 
-First we need look at how to import data and format them in a way that proper analysis is possible.
+* Seasonal trends
+* Frequencies
+* Variation across states 
 
-#### Example Code
+---
 
-##### Using read.delim AND extras
+#### Using `read.delim` AND extras
 
 - `read.delim` -> function for reading csv data 
 - "stringAsFactors=False" -> Prevent auto conversion from raw to data 
@@ -30,7 +29,7 @@ ufo<-read.delim("data/ufo/ufo_awesome.tsv",sep="\t",stringAsFactors=FALSE,header
 head(ufo) #Generating header by R
 ```
 
-##### Setting custom header names
+#### Setting custom header names
 
 Instead of V1,V2,V3... We want some headers that would help us better understand the column data.
 
@@ -38,9 +37,9 @@ Instead of V1,V2,V3... We want some headers that would help us better understand
 names(ufo)<-c("DateOccured","DateReported","Location","ShortDescription","Duration","LongDesc")
 ```
 
-[!] C means constructing a **vector**
+> c("...") means constructing a vector
 
-##### Organising Dates: 
+#### Organising Dates: 
 
 We can manually grab date sub-objects and convert them:
 
@@ -49,9 +48,9 @@ ufo$DateOccurred<-as.Date(ufo$DateOccurred,format="%Y%m%d")
 ufo$DateReported<-as.Date(ufo$DateReported, format="%Y%m%d")
 ```
 
-The command above should produce an error. This is due to some entry being out of format and malformed. 
+> The command above should produce an error. This is due to some entry being out of format and malformed. 
 
-We then need to to create a "data vector" for good entries and bad entries, which we will use to reapply into the frame. 
+We then need to to create a "**data vector**" for _good entries and bad entries_, which we will use to reapply into the frame. 
 
 ```r
 good.rows<-ifelse(nchar(ufo$DateOccurred)>!=8 | nchar(ufo$DateReported)!=8,False,True)
@@ -69,19 +68,21 @@ ufo<-ufo[good.rows,]
 
 Now we can repeat the formatting codes and it should work
 
-##### Organising locational data: 
+#### Organising locational data: 
 
 We use `lapply` function to format location data using R's regex.
 
 ![Organising Location Data](http://i.imgur.com/zKP0cxn.png)
 
-- `gsub` --> Global Substitution: Used to replace trailing white space
-- `tryCatch` --> Use a generic error function to catch errors 
-- `strsplit` --> Used to catch errors in splitting the delimiter
+| Name | Usage |
+| :------ | :------------:|
+| `gsub` | Global Substitution: Used to replace trailing white space |
+| `tryCatch` | Use a generic error function to catch errors |
+| `strsplit` | Used to catch errors in splitting the delimiter |
 
 **After defining this method, we use `lapply` to apply this sequentualy to all instances in the iterable of locations**
 
-##### Organising location into states: 
+#### Organising location into states: 
 
 1. We aply `rbind` and `city.state` into `do.call` to convert it into a matrix.
 
@@ -113,9 +114,10 @@ quick.hist <- ggplot(ufo.us, aes(x = DateOccurred)) +
   #scale_x_date(breaks = "50 years")
 ```
 
-Since this doesn't give us much details, we need to scale down and focus on the recent years where there are most data
+> Since this doesn't give us much details, we need to scale down and focus on the recent years where there are most data
 
-###### Focusing on subset
+
+##### Focusing on subset
 
 We use the `subset` function to manipulate data to store only instances that happened after a certain date. After this we apply the `nrow` function to get the number of instances.
 
@@ -128,22 +130,21 @@ new.hist <- ggplot(ufo.us, aes(x = DateOccurred)) +
 ```
 
 
-##### Counting UFO sights
+#### Counting UFO sightings
 
-1. We use `strftime` --> Convert date into "YYYY-MM" format and add a column.
+We use `strftime` --> Convert date into "YYYY-MM" format and add a column.
 
 ```r
 ufo.us$YearMonth<-strftime(ufo.us$DateOccurred, format="%Y-%m")
 ```
 
-
-2. We use `ddply` --> Maps the selected data into appropriate rows and store as a new object (matrix)
+We use `ddply` --> Maps the selected data into appropriate rows and store as a new object (matrix)
 
 ```r
 sightings.counts <- ddply(ufo.us, .(USState,YearMonth), nrow)
 ```
 
-3. Since there are some months with 0 occurrences, we need to fill in those as well by creating a new data frame with all the dates and states just like the one we have, then merge it with the existing frame and let R do the filling in the blank. 
+Since there are some months with 0 occurrences, we need to fill in those as well by creating a new data frame with all the dates and states just like the one we have, then merge it with the existing frame and let R do the filling in the blank. 
 
 ```r
 date.range <- seq.Date(from = as.Date(min(ufo.us$DateOccurred)),
@@ -170,7 +171,7 @@ all.sightings <- merge(states.dates,
                        all = TRUE)
 ```
 
-4. We clean up the data. Put 0 for all NA values and reset the YearMonth column to Date type as well as refactor the State column
+We clean up the data. Put 0 for all NA values and reset the YearMonth column to Date type as well as refactor the State column
 
 ```r
 # Covert the NAs to 0's, what we really wanted
@@ -221,7 +222,7 @@ state.plot <- ggplot(all.sightings, aes(x = YearMonth,y = Sightings)) +
 - Numerial
 - Dimensionality 
 - Correlation 
-- StdVar & Variances
+- Standard Varation & Variances
 
 
 
