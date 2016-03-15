@@ -213,9 +213,15 @@ state.plot <- ggplot(all.sightings, aes(x = YearMonth,y = Sightings)) +
 
 ## Data Exploration
 
-### Data Set
+There are two parts to data exploration: 
 
-**A big table of numbers & strings in which the rows are descriptions & observations the collumns are attributes.**
+| Name | Function | 
+| ---- | :----: |
+| Exploration | Explore and find hidden patterns in the data |
+| Confirmation | Confirming the discovered patterns, remove fallacies |
+
+
+> Data Set: A big table of numbers & strings in which the rows are descriptions & observations the collumns are attributes.
 
 ### Summary Methods
 
