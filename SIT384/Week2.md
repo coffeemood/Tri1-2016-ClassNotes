@@ -175,7 +175,7 @@ summary(hardham.res)
 ```
 
 |Mode|FALSE|TRUE|NA's|
-| |:--:|:--:|:--:|
+|:--:|:--:|:--:|:--:|
 |logical|243|6|0|
 
 
