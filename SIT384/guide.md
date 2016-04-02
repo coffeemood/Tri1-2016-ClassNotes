@@ -2,19 +2,21 @@
 
 Hey guys, this is a quick guide for using R & bash to grab mosts of Dr. Zhang's papers. I wasn't able to get all 60+ but it was enough to work with. 
 
-1. Download [this](https://cran.r-project.org/web/packages/scholar/index.html) R package (*I'm not walking you through this*)
++ Download [this](https://cran.r-project.org/web/packages/scholar/index.html) R package (*I'm not walking you through this*)
 
-2. Load the package, and get his publications using the `get_publications()` function
++ Download `pup` for bash [here](https://github.com/ericchiang/pup)
+
++ Load the package, and get his publications using the `get_publications()` function
 
 ```r
 library(scholar)
 jun = c("QmsjV8QAAAAJ")
-jun_publishes = get_publications()
+jun_publishes = get_publications(jun)
 #Export all of the pubids to a text file (Destination of your choice) 
-write(as.character(jun_publishes$pubid), file="~/~/links.txt")
+write(as.character(jun_publishes$pubid), file="~/~/links.txt") # <-- This is the destination file
 ```
 
-3. Run a bash script to grab all the pdfs link 
++ Run a bash script to grab all the pdfs link 
 
 ```bash
 #!/bin/bash
@@ -29,7 +31,7 @@ echo "All done :)"
 
 > Remember to place the links file in the same folder as the bash script 
 
-4. Finally, just download the pdfs
++ Finally, just download the pdfs
 
 ```bash
 while read line; do 
