@@ -33,7 +33,7 @@ rmse <- function(y, h)
 }
 ```
 
-Next, we want to recursively apply rmse to the two df. We will only use up to polynomial degree of 12, not 14
+Recursively apply rmse to the two df. We will only use up to polynomial degree of 12, not 14
 
 ```r
 performance <- data.frame()
@@ -54,7 +54,7 @@ newdata = test.df))))
 
 ![plottedrmsevsdegree](http://i.imgur.com/03HabIV.png)
 
-The plotted polynomial graph comparing the rmse level as the degree increases show us the picking too high or too low of a degree will lead to inconsistency between performance (Training vs Testing). 
+The plotted polynomial graph comparing the rmse level as the degree increases demonstrate that picking too high or too low of a degree will lead to inconsistency between performances (Training vs Testing). 
 
 The model is either **not complex enough** at low degrees (Doesn't fit with the data set) or **too complex** at too high a degree (Fit too well with one data set which brings trouble to when used in testing)
 
@@ -76,11 +76,11 @@ Plotting the lambda value against RMSE, we can see the best lambda value is arou
 
 ### Test Regression 
 
-When analysing texts, we often run into the trouble of having more words than observation. This leads to us using more 2-grams, 3-grams data. Because of this, we want to use **regularization** to attempt to prevents overfit 
+When analysing texts, we often run into the trouble of having more words than observation. Introducing the use of 2-grams, 3-grams data. Since we often have more data than observations, we use **regularization** to prevents overfit.
 
 #### Predicting Bestsellers 
 
-In this example, we attempt to convert the descriptions of each book into word vector, do a little cleaning with the data and fit them in order to predict book sales based on description 
+In this example, we take a look at 100 bestsellers and attempt to convert the descriptions of each book into word vector, do a little cleaning with the data and fit them in order to predict book sales based on description 
 
 ```r
 ranks <- read.csv(file.path('data', 'oreilly.csv'),
