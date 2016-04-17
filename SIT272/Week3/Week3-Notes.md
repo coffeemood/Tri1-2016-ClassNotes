@@ -12,6 +12,7 @@ There are three main types of media
 ![Medias](http://i.imgur.com/XeFsv4d.png)
 
 ![Comparison](http://i.imgur.com/ZdL7jAr.png)
+
 | Name | IEEE | Speed | Desc | 
 | ---- | ---- | ---- | :-----: |
 | Wifi | 802.11 | Upto 7Gbs | Uses CSMA/CA |
