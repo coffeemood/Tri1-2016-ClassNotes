@@ -73,6 +73,8 @@ Two sublayers:
 
 ![frame model](http://i.imgur.com/a4kOwxY.png)
 
+| Name | Description | 
+| ---- | ------------ | 
 | Preamble |  Used for synchronisation |
 | Destination| 48bit destination MAC |
 | Source | 48bit source MAC |
