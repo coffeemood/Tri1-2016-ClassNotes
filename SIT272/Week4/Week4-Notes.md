@@ -20,6 +20,7 @@ The IPv6 address:
 | Unicast | same as v4 |
 | Multicast | save as v4 |
 | Anycast | Sent to multiple destinations, routed to nearest devices |
+| Solicited-node multicast | Used for multi-casting in local-link by NDP for optaining Layer-2 address (**Work by appending last 24 bits to ff02::1:ff00:0/104**) |
 | Link-Local | Similar to v4. Configured locally to route LAN devices |
 | Loopback | ::1 |
 | Unique-local | Similar to private IPs |
@@ -27,6 +28,10 @@ The IPv6 address:
 | Unspecified | :: | 
 
 **There are no broadcast addresses in v6** 
+
+> E.g. of the making of solicited-node multicast 
+
+![solicitednodemulti](http://i.imgur.com/GhsVt9V.png)
 
 #### Global Unicast Address
 
