@@ -1,0 +1,61 @@
+# Write up on research & draft analysis for Spam Classification problem 
+
+#### A dry run Naive Bayes on the two data set 
+
+In this chapter I built my classifier based on naive bayes word occurrence for both phishing and non-phishing data set. The processing procedure involved  stripping white space, removing stop words, numbers and punctuation, etc... The classifier was then built based on word occurrence, with the addition of the `c` value used for terms that haven't been seen before. 
+
+After building the data frames for each of these data set, I ran the phishing data through the two `training.df`, twice with the prior being 0.5 and 0.9 (phishing vs. non-phishing estimation) respectively. Here are the results
+
+```r
+classify.msg <- function(path, training.df, prior = 0.5, c = 1e-6)
+{
+  # Here, we use many of the support functions to get the
+  # email text data in a workable format
+  msg <- get.msg(path)
+  msg.tdm <- get.tdm(msg)
+  msg.freq <- rowSums(as.matrix(msg.tdm))
+  # Find intersections of words
+  msg.match <- intersect(names(msg.freq), training.df$term)
+  # Now, we just perform the naive Bayes calculation
+  if(length(msg.match) < 1)
+  {
+    return(prior * c ^ (length(msg.freq)))
+  }
+  else
+  {
+    match.probs <- training.df$occurrence[match(msg.match, training.df$term)]
+    return(prior * prod(match.probs) * c ^ (length(msg.freq) - length(msg.match)))
+  }
+}
+
+p.pt <- sapply(p.docs,
+                           function(p) classify.msg(file.path(p.path, p), training.df = p.df))
+p.npt <- sapply(p.docs,
+                          function(p) classify.msg(file.path(p.path, p), training.df = np.df))
+p.res <- ifelse(p.pt > p.npt,
+                      TRUE,
+                      FALSE)
+summary(p.res)
+
+np.pt <- sapply(np.docs,
+                           function(p) classify.msg(file.path(np.path, p), training.df = p.df))
+
+np.npt <- sapply(np.docs,
+                          function(p) classify.msg(file.path(np.path, p), training.df = np.df))
+
+np.res <- ifelse(np.pt > np.npt,
+                      TRUE,
+                      FALSE)
+summary(np.res)
+
+```
+
+<table><tr><td colspan="4" align="center" ><b>Result for Phishing</b></td></tr>
+<tr><td>Mode</td><td>False</td><td>True</td><td>NA's</td></tr><tr><td>Logical</td><td>345</td><td>34</td><td>0</td></tr></table> 
+
+The result for the phishing data set shows that the prior doesn't have any correlation with the outcome, which isn't that great given that it was fed all phishing messages, in this particular instance 
+
+<table><tr><td colspan="4" align="center" ><b>Result for Non-Phishing</b></td></tr>
+<tr><td>Mode</td><td>False</td><td>NA's</td></tr><tr><td>Logical</td><td>380</td><td>0</td></tr></table> 
+
+The classifier performed well on non-phishing data set, giving a 100% accuracy in predicting the 380 non-phishing messages, with the given prior of 0.5.
