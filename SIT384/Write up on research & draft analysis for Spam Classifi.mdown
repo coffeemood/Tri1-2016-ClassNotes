@@ -4,6 +4,200 @@
 
 In this chapter I built my classifier based on naive bayes word occurrence for both phishing and non-phishing data set. The processing procedure involved  stripping white space, removing stop words, numbers and punctuation, etc... The classifier was then built based on word occurrence, with the addition of the `c` value used for terms that haven't been seen before. 
 
+The usual data processing code 
+
+```r
+formatting = function(docs) {
++ docs = tm_map(docs, removePunctuation)
++ docs = tm_map(docs, removeNumbers)
++ docs = tm_map(docs, removeWords, stopwords("english"))
++ docs = tm_map(docs, stripWhitespace)
++ docs = tm_map(docs, tolower)
++ docs = tm_map(docs, PlainTextDocument)
++ }
+```
+
+
+#### SVM using `caret`
+
+> Preprocessing Continued... 
+
+```r
+length(grep("please",all.df$text[6])) / (sapply(gregexpr("\\W+", all.df$text[6]), length) + 1)
+
+for (i in top20p)
+{
+    name = paste('freq_',i,sep="")
+    all.df[,name] = sapply(1:nrow(all.df),
+                    function(z)
+                    {
+                      length(grep(i,all.df$text[z])) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)  
+                        })
+}
+
+for (i in top20np)
+{
+    name = paste('freq_',i,sep="")
+    all.df[,name] = sapply(1:nrow(all.df),
+                    function(z)
+                    {
+                      length(grep(i,all.df$text[z])) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)  
+                        })
+}
+
+```
+
+Make a graph to see correlations between certain words and the classified type of message
+
+```r
+#step 1: melt all.df with id.var being `type`
+#step 2: Plot
+
+ggplot(data= alt.alldf2, aes(x = variable, y = value)) +
+  geom_text(aes(color = type,
+                               label = type)) +
+                               expand_limits(y=0.0005)
+
+```
+
+```r
+
+fitControl <- trainControl(method = "repeatedcv",
+                           repeats = 10)
+
+x <- train(type2 ~ . ,data = dataTrain2, 
+    na.action = na.omit,
+                 method = "svmRadial",
+                tuneGrid = svmTuneGrid,
+                 trControl = fitControl)
+
+pred <- predict(x,dataTest2[,2:27])
+
+acc <- confusionMatrix(pred,dataTest2$type)
+
+acc
+```
+
+```
+Confusion Matrix and Statistics
+
+          Reference
+Prediction  n  p
+         n 63 25
+         p 13 50
+
+               Accuracy : 0.7483
+                 95% CI : (0.6713, 0.8153)
+    No Information Rate : 0.5033
+    P-Value [Acc > NIR] : 6.351e-10
+
+                  Kappa : 0.4961
+ Mcnemar's Test P-Value : 0.07435
+
+            Sensitivity : 0.8289
+            Specificity : 0.6667
+         Pos Pred Value : 0.7159
+         Neg Pred Value : 0.7937
+             Prevalence : 0.5033
+         Detection Rate : 0.4172
+   Detection Prevalence : 0.5828
+      Balanced Accuracy : 0.7478
+
+       'Positive' Class : n
+```
+
+##### Naive Bayes package run 
+
+```r
+fitControl <- trainControl(method = "cv",
+                           repeats = 20)
+
+x <- train(type2 ~ . ,data = dataTrain2, 
+    na.action = na.omit,
+                 method = "nb",
+                 trControl = fitControl)
+
+pred <- predict(x,dataTest2[,2:27])
+
+acc <- confusionMatrix(pred,dataTest2$type)
+
+acc
+
+          Reference
+Prediction  n  p
+         n 67 49
+         p  9 26
+
+               Accuracy : 0.6159
+                 95% CI : (0.5333, 0.6938)
+    No Information Rate : 0.5033
+    P-Value [Acc > NIR] : 0.003508
+
+                  Kappa : 0.229
+ Mcnemar's Test P-Value : 3.04e-07
+
+            Sensitivity : 0.8816
+            Specificity : 0.3467
+         Pos Pred Value : 0.5776
+         Neg Pred Value : 0.7429
+             Prevalence : 0.5033
+         Detection Rate : 0.4437
+   Detection Prevalence : 0.7682
+      Balanced Accuracy : 0.6141
+
+       'Positive' Class : n
+```
+
+
+#### knn Package Run 
+
+```r
+fitControl <- trainControl(method = "repeatedcv",
+                           repeats = 10)
+
+x <- train(type2 ~ . ,data = dataTrain2, 
+    na.action = na.omit,
+                     preProcess = c("center", "scale"),
+                 method = "knn",
+                 tuneLength = 10,
+                 trControl = fitControl)
+
+pred <- predict(x,dataTest2[,2:27])
+
+acc <- confusionMatrix(pred,dataTest2$type)
+
+acc
+
+Confusion Matrix and Statistics
+
+          Reference
+Prediction  n  p
+         n 65 35
+         p 11 40
+
+               Accuracy : 0.6954
+                 95% CI : (0.6153, 0.7676)
+    No Information Rate : 0.5033
+    P-Value [Acc > NIR] : 1.313e-06
+
+                  Kappa : 0.3894
+ Mcnemar's Test P-Value : 0.000696
+
+            Sensitivity : 0.8553
+            Specificity : 0.5333
+         Pos Pred Value : 0.6500
+         Neg Pred Value : 0.7843
+             Prevalence : 0.5033
+         Detection Rate : 0.4305
+   Detection Prevalence : 0.6623
+      Balanced Accuracy : 0.6943
+
+       'Positive' Class : n
+
+```
+
+##### Naive Bayes manual run 
+
 After building the data frames for each of these data set, I ran the phishing data through the two `training.df`, twice with the prior being 0.5 and 0.9 (phishing vs. non-phishing estimation) respectively. Here are the results
 
 ```r
