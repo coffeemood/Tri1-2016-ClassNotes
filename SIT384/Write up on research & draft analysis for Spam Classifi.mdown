@@ -23,7 +23,6 @@ formatting = function(docs) {
 > Preprocessing Continued... 
 
 ```r
-length(grep("please",all.df$text[6])) / (sapply(gregexpr("\\W+", all.df$text[6]), length) + 1)
 
 for (i in top20p)
 {
@@ -31,7 +30,7 @@ for (i in top20p)
     all.df[,name] = sapply(1:nrow(all.df),
                     function(z)
                     {
-                      length(grep(i,all.df$text[z])) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)  
+                     100 * length(grep(i,all.df$text[z], ignor.case = TRUE)) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)
                         })
 }
 
@@ -41,9 +40,28 @@ for (i in top20np)
     all.df[,name] = sapply(1:nrow(all.df),
                     function(z)
                     {
-                      length(grep(i,all.df$text[z])) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)  
+                    100 * length(grep(i,all.df$text[z], ignore.case = TRUE)) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)
                         })
 }
+
+# Add http feature 
+all.df$http = sapply(1:nrow(all.df),
+                    function(z)
+                    {
+                    length(grep("http",all.df$text[z])) 
+                        })
+
+# Cleanup for classification 
+
+set.seed(83)
+trainIndex = createDataPartition(all.df$type, p = .8, list = FALSE, times = 1)
+dataTrain = all.df[trainIndex, ]
+dataTest = all.df[-trainIndex, ]
+dataTrain$msg = NULL 
+dataTrain$text = NULL 
+dataTest$msg = NULL 
+dataTest$text = NULL 
+
 
 ```
 
@@ -63,47 +81,43 @@ ggplot(data= alt.alldf2, aes(x = variable, y = value)) +
 ```r
 
 fitControl <- trainControl(method = "repeatedcv",
-                           repeats = 10)
+                           repeats = 20)
 
-x <- train(type2 ~ . ,data = dataTrain2, 
+x <- train(type ~ . ,data = dataTrain, 
     na.action = na.omit,
                  method = "svmRadial",
                 tuneGrid = svmTuneGrid,
                  trControl = fitControl)
 
-pred <- predict(x,dataTest2[,2:27])
+pred <- predict(x,dataTest[,1:28])
 
-acc <- confusionMatrix(pred,dataTest2$type)
+acc <- confusionMatrix(pred,dataTest$type)
 
 acc
-```
-
-```
-Confusion Matrix and Statistics
-
           Reference
 Prediction  n  p
-         n 63 25
-         p 13 50
+         n 52 12
+         p 24 63
 
-               Accuracy : 0.7483
-                 95% CI : (0.6713, 0.8153)
+               Accuracy : 0.7616
+                 95% CI : (0.6855, 0.8271)
     No Information Rate : 0.5033
-    P-Value [Acc > NIR] : 6.351e-10
+    P-Value [Acc > NIR] : 6.766e-11
 
-                  Kappa : 0.4961
- Mcnemar's Test P-Value : 0.07435
+                  Kappa : 0.5237
+ Mcnemar's Test P-Value : 0.06675
 
-            Sensitivity : 0.8289
-            Specificity : 0.6667
-         Pos Pred Value : 0.7159
-         Neg Pred Value : 0.7937
+            Sensitivity : 0.6842
+            Specificity : 0.8400
+         Pos Pred Value : 0.8125
+         Neg Pred Value : 0.7241
              Prevalence : 0.5033
-         Detection Rate : 0.4172
-   Detection Prevalence : 0.5828
-      Balanced Accuracy : 0.7478
+         Detection Rate : 0.3444
+   Detection Prevalence : 0.4238
+      Balanced Accuracy : 0.7621
 
        'Positive' Class : n
+
 ```
 
 ##### Naive Bayes package run 
@@ -112,38 +126,40 @@ Prediction  n  p
 fitControl <- trainControl(method = "cv",
                            repeats = 20)
 
-x <- train(type2 ~ . ,data = dataTrain2, 
+x <- train(type ~ . ,data = dataTrain, 
     na.action = na.omit,
                  method = "nb",
                  trControl = fitControl)
 
-pred <- predict(x,dataTest2[,2:27])
+pred <- predict(x,dataTest[,1:28])
 
-acc <- confusionMatrix(pred,dataTest2$type)
+acc <- confusionMatrix(pred,dataTest$type)
 
 acc
 
+Confusion Matrix and Statistics
+
           Reference
 Prediction  n  p
-         n 67 49
-         p  9 26
+         n 53 17
+         p 23 58
 
-               Accuracy : 0.6159
-                 95% CI : (0.5333, 0.6938)
+               Accuracy : 0.7351
+                 95% CI : (0.6572, 0.8035)
     No Information Rate : 0.5033
-    P-Value [Acc > NIR] : 0.003508
+    P-Value [Acc > NIR] : 5.199e-09
 
-                  Kappa : 0.229
- Mcnemar's Test P-Value : 3.04e-07
+                  Kappa : 0.4705
+ Mcnemar's Test P-Value : 0.4292
 
-            Sensitivity : 0.8816
-            Specificity : 0.3467
-         Pos Pred Value : 0.5776
-         Neg Pred Value : 0.7429
+            Sensitivity : 0.6974
+            Specificity : 0.7733
+         Pos Pred Value : 0.7571
+         Neg Pred Value : 0.7160
              Prevalence : 0.5033
-         Detection Rate : 0.4437
-   Detection Prevalence : 0.7682
-      Balanced Accuracy : 0.6141
+         Detection Rate : 0.3510
+   Detection Prevalence : 0.4636
+      Balanced Accuracy : 0.7354
 
        'Positive' Class : n
 ```
@@ -155,16 +171,15 @@ Prediction  n  p
 fitControl <- trainControl(method = "repeatedcv",
                            repeats = 10)
 
-x <- train(type2 ~ . ,data = dataTrain2, 
+x <- train(type ~ . ,data = dataTrain, 
     na.action = na.omit,
-                     preProcess = c("center", "scale"),
                  method = "knn",
                  tuneLength = 10,
                  trControl = fitControl)
 
-pred <- predict(x,dataTest2[,2:27])
+pred <- predict(x,dataTest[,1:29])
 
-acc <- confusionMatrix(pred,dataTest2$type)
+acc <- confusionMatrix(pred,dataTest$type)
 
 acc
 
@@ -172,29 +187,76 @@ Confusion Matrix and Statistics
 
           Reference
 Prediction  n  p
-         n 65 35
-         p 11 40
+         n 57 22
+         p 19 53
 
-               Accuracy : 0.6954
-                 95% CI : (0.6153, 0.7676)
+               Accuracy : 0.7285
+                 95% CI : (0.6502, 0.7976)
     No Information Rate : 0.5033
-    P-Value [Acc > NIR] : 1.313e-06
+    P-Value [Acc > NIR] : 1.415e-08
 
-                  Kappa : 0.3894
- Mcnemar's Test P-Value : 0.000696
+                  Kappa : 0.4568
+ Mcnemar's Test P-Value : 0.7548
 
-            Sensitivity : 0.8553
-            Specificity : 0.5333
-         Pos Pred Value : 0.6500
-         Neg Pred Value : 0.7843
+            Sensitivity : 0.7500
+            Specificity : 0.7067
+         Pos Pred Value : 0.7215
+         Neg Pred Value : 0.7361
              Prevalence : 0.5033
-         Detection Rate : 0.4305
-   Detection Prevalence : 0.6623
-      Balanced Accuracy : 0.6943
+         Detection Rate : 0.3775
+   Detection Prevalence : 0.5232
+      Balanced Accuracy : 0.7283
 
        'Positive' Class : n
 
 ```
+
+#### randomForest package run 
+
+```r
+fitControl <- trainControl(method = "repeatedcv",
+                           repeats = 10)
+
+x <- train(type ~ . ,data = dataTrain, 
+    na.action = na.omit,
+                 method = "rf",
+                 tuneLength = 10,
+                 trControl = fitControl)
+
+pred <- predict(x,dataTest[,1:29])
+
+acc <- confusionMatrix(pred,dataTest$type)
+
+acc
+
+Confusion Matrix and Statistics
+
+          Reference
+Prediction  n  p
+         n 60 17
+         p 16 58
+
+               Accuracy : 0.7815
+                 95% CI : (0.707, 0.8445)
+    No Information Rate : 0.5033
+    P-Value [Acc > NIR] : 1.798e-12
+
+                  Kappa : 0.5629
+ Mcnemar's Test P-Value : 1
+
+            Sensitivity : 0.7895
+            Specificity : 0.7733
+         Pos Pred Value : 0.7792
+         Neg Pred Value : 0.7838
+             Prevalence : 0.5033
+         Detection Rate : 0.3974
+   Detection Prevalence : 0.5099
+      Balanced Accuracy : 0.7814
+
+       'Positive' Class : n
+
+```
+
 
 ##### Naive Bayes manual run 
 
@@ -253,3 +315,5 @@ The result for the phishing data set shows that the prior doesn't have any corre
 <tr><td>Mode</td><td>False</td><td>NA's</td></tr><tr><td>Logical</td><td>380</td><td>0</td></tr></table> 
 
 The classifier performed well on non-phishing data set, giving a 100% accuracy in predicting the 380 non-phishing messages, with the given prior of 0.5.
+
+
