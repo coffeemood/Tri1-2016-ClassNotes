@@ -24,13 +24,26 @@ formatting = function(docs) {
 
 ```r
 
+topmanual = c("bank", "click", "account", "attachment", "access", "password", "security", "information", "limited", "suspended", "blocked")
+
+for (i in topmanual)
+{
+    name = paste('freq_',i,sep="")
+    all.df[,name] = sapply(1:nrow(all.df),
+                    function(z)
+                    {
+                     100 * length(grep(i,all.df$text[z], ignore.case = TRUE)) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)
+                        })
+}
+
+
 for (i in top20p)
 {
     name = paste('freq_',i,sep="")
     all.df[,name] = sapply(1:nrow(all.df),
                     function(z)
                     {
-                     100 * length(grep(i,all.df$text[z], ignor.case = TRUE)) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)
+                     100 * length(grep(i,all.df$text[z], ignore.case = TRUE)) / (sapply(gregexpr("\\W+", all.df$text[z]), length) + 1)
                         })
 }
 
